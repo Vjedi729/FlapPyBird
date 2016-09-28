@@ -15,9 +15,9 @@ py2exe.build_exe.isSystemDLL = isSystemDLL
 sys.argv.append('py2exe')
 
 setup(
-    name =    'Flappy Bird',
+    name =    'FlapPy Bird - 196 Edition',
     version = '1.0',
-    author =  'Sourabh Verma',
+    author =  'Sourabh Verma (changes by Rick Sheahan)',
     options = {
         'py2exe': {
             'bundle_files': 1, # doesn't work on win64

@@ -76,8 +76,6 @@ def main():
     IMAGES['gameover'] = pygame.image.load('assets/sprites/gameover.png').convert_alpha()
     # message sprite for welcome screen
     IMAGES['message'] = pygame.image.load('assets/sprites/message.png').convert_alpha()
-    # base (ground) sprite
-    IMAGES['base'] = pygame.image.load('assets/sprites/base.png').convert_alpha()
 
     # sounds
     if 'win' in sys.platform:
@@ -144,9 +142,6 @@ def showWelcomeAnimation():
     messagex = int((SCREENWIDTH - IMAGES['message'].get_width()) / 2)
     messagey = int(SCREENHEIGHT * 0.12)
 
-    basex = 0
-    # amount by which base can maximum shift to left
-    baseShift = IMAGES['base'].get_width() - IMAGES['background'].get_width()
 
     # player shm for up-down motion on welcome screen
     playerShmVals = {'val': 0, 'dir': 1}
@@ -161,15 +156,13 @@ def showWelcomeAnimation():
                 SOUNDS['wing'].play()
                 return {
                     'playery': playery + playerShmVals['val'],
-                    'basex': basex,
                     'playerIndexGen': playerIndexGen,
                 }
 
-        # adjust playery, playerIndex, basex
+        # adjust playery, playerIndex
         if (loopIter + 1) % 5 == 0:
             playerIndex = playerIndexGen.next()
         loopIter = (loopIter + 1) % 30
-        basex = -((-basex + 4) % baseShift)
         playerShm(playerShmVals)
 
         # draw sprites
@@ -177,7 +170,6 @@ def showWelcomeAnimation():
         SCREEN.blit(IMAGES['player'][playerIndex],
                     (playerx, playery + playerShmVals['val']))
         SCREEN.blit(IMAGES['message'], (messagex, messagey))
-        SCREEN.blit(IMAGES['base'], (basex, BASEY))
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
@@ -187,9 +179,9 @@ def mainGame(movementInfo):
     score = playerIndex = loopIter = 0
     playerIndexGen = movementInfo['playerIndexGen']
     playerx, playery = int(SCREENWIDTH * 0.2), movementInfo['playery']
+    # movementInfo is the form {'playery': someNumber, 'playerIndexGen': playerIndexGen }
 
-    basex = movementInfo['basex']
-    baseShift = IMAGES['base'].get_width() - IMAGES['background'].get_width()
+
 
     # get 2 new pipes to add to upperPipes lowerPipes list
     newPipe1 = getRandomPipe()
@@ -207,6 +199,7 @@ def mainGame(movementInfo):
         {'x': SCREENWIDTH + 200 + (SCREENWIDTH / 2), 'y': newPipe2[1]['y']},
     ]
 
+    # the pipe velocity is how fast the pipes move towards the left side of the screen
     pipeVelX = -4
 
     # player velocity, max velocity, downward accleration, accleration on flap
@@ -219,6 +212,7 @@ def mainGame(movementInfo):
 
 
     while True:
+        # check "events", that includes keyboard presses and window closes
         for event in pygame.event.get():
             if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
                 pygame.quit()
@@ -236,7 +230,6 @@ def mainGame(movementInfo):
             return {
                 'y': playery,
                 'groundCrash': crashTest[1],
-                'basex': basex,
                 'upperPipes': upperPipes,
                 'lowerPipes': lowerPipes,
                 'score': score,
@@ -251,11 +244,11 @@ def mainGame(movementInfo):
                 score += 1
                 SOUNDS['point'].play()
 
-        # playerIndex basex change
+        # playerIndex change
         if (loopIter + 1) % 3 == 0:
             playerIndex = playerIndexGen.next()
         loopIter = (loopIter + 1) % 30
-        basex = -((-basex + 100) % baseShift)
+
 
         # player's movement
         if playerVelY < playerMaxVelY and not playerFlapped:
@@ -288,7 +281,7 @@ def mainGame(movementInfo):
             SCREEN.blit(IMAGES['pipe'][0], (uPipe['x'], uPipe['y']))
             SCREEN.blit(IMAGES['pipe'][1], (lPipe['x'], lPipe['y']))
 
-        SCREEN.blit(IMAGES['base'], (basex, BASEY))
+
         # print score so player overlaps the score
         showScore(score)
         SCREEN.blit(IMAGES['player'][playerIndex], (playerx, playery))
@@ -306,7 +299,6 @@ def showGameOverScreen(crashInfo):
     playerVelY = crashInfo['playerVelY']
     playerAccY = 2
 
-    basex = crashInfo['basex']
 
     upperPipes, lowerPipes = crashInfo['upperPipes'], crashInfo['lowerPipes']
 
@@ -339,7 +331,6 @@ def showGameOverScreen(crashInfo):
             SCREEN.blit(IMAGES['pipe'][0], (uPipe['x'], uPipe['y']))
             SCREEN.blit(IMAGES['pipe'][1], (lPipe['x'], lPipe['y']))
 
-        SCREEN.blit(IMAGES['base'], (basex, BASEY))
         showScore(score)
         SCREEN.blit(IMAGES['player'][1], (playerx,playery))
 
@@ -364,7 +355,7 @@ def getRandomPipe():
     gapY = random.randrange(0, int(BASEY * 0.6 - PIPEGAPSIZE))
     gapY += int(BASEY * 0.2)
     pipeHeight = IMAGES['pipe'][0].get_height()
-    pipeX = SCREENWIDTH + 10
+    pipeX = SCREENWIDTH + 200
 
     return [
         {'x': pipeX, 'y': gapY - pipeHeight},  # upper pipe

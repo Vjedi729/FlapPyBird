@@ -210,7 +210,7 @@ def mainGame(movementInfo):
     playerFlapAcc =  -9   # players speed on flapping
     playerFlapped = False # True when player flaps
 
-
+    # This "while True:" is actually the MAIN GAME LOOP
     while True:
         # check "events", that includes keyboard presses and window closes
         for event in pygame.event.get():
@@ -286,6 +286,7 @@ def mainGame(movementInfo):
         showScore(score)
         SCREEN.blit(IMAGES['player'][playerIndex], (playerx, playery))
 
+        # Tells the renderer and framerate stabilizer that we are done with this frame
         pygame.display.update()
         FPSCLOCK.tick(FPS)
 
